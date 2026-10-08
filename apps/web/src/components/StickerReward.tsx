@@ -7,7 +7,9 @@ import { addSticker } from '../store/repo';
 
 type StickerDef = (typeof stickers)[number];
 
-export function StickerReward({ childId, onDone, doneLabel = 'يلا' }: { childId: string; onDone: () => void; doneLabel?: string }) {
+export function StickerReward({ childId, onDone, doneLabel = 'يلا', onAgain }: {
+  childId: string; onDone: () => void; doneLabel?: string; onAgain?: () => void;
+}) {
   const [choices, setChoices] = useState<StickerDef[] | null>(null);
   const [picked, setPicked] = useState<StickerDef | null>(null);
 
@@ -46,6 +48,7 @@ export function StickerReward({ childId, onDone, doneLabel = 'يلا' }: { child
           <div className="sticker-won"><Art code={picked.art} size={150} /></div>
           <h2 className="reward-title">الملصق راح في كتاب الملصقات!</h2>
           <button className="btn btn-primary" onClick={onDone}>{doneLabel}</button>
+          {onAgain && <button className="btn" onClick={onAgain}>نلعب تاني</button>}
         </>
       )}
     </section>

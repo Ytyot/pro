@@ -34,7 +34,7 @@ for (const scheme of ['light', 'dark'] as const) {
     await page.getByRole('radio', { name: '٢' }).click({ timeout: 10_000 });
     await visit(`${base}/progress`, '08-progress');
     await visit(`${base}/voice`, '09-voice-menu');
-    for (const [game, n] of [['turtle', 10], ['balloon', 12], ['snake', 14], ['bubbles', 16]] as const) {
+    for (const [game, n] of [['turtle', 10], ['balloon', 12], ['snake', 14], ['bubbles', 16], ['rocket', 31], ['star', 33], ['fish', 35]] as const) {
       await visit(`${base}/voice/${game}`, `${n}-${game}-intro`);
       await page.getByRole('button', { name: 'يلا نبدأ' }).click();
       await shoot(`${n + 1}-${game}-play`);

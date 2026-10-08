@@ -5,12 +5,14 @@ import { speech } from '../content';
 import { shuffle } from '../logic/leitner';
 import { snakeStart, snakeStep } from '../logic/motion';
 import { Dots } from './TurtleBoard';
+import { Celebrate, HearWord, TurnProgress } from './GameBits';
+import type { LevelSource } from './input';
 import { useFrame } from './useFrame';
 
 const TURNS = 5;
 const STRETCHY = ['س', 'ش', 'ف', 'م', 'ن', 'ل', 'و', 'ع'];
 
-export function SnakeBoard({ getLevel, onFinish }: { getLevel: () => number; onFinish: () => void }) {
+export function SnakeBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFinish: () => void }) {
   const words = useMemo(
     () => shuffle(speech.words.filter((w) => STRETCHY.includes(w.text[0]!))).slice(0, TURNS), []);
   const [turn, setTurn] = useState(0);
@@ -30,8 +32,10 @@ export function SnakeBoard({ getLevel, onFinish }: { getLevel: () => number; onF
       <div className="word-card">
         <Art code={word.art} size={110} />
         <span><span className="stretch">{first}ـــ</span>{word.text.slice(1)}</span>
+        <HearWord text={word.text} />
       </div>
-      <div className="snake-stage"><Snake length={s.length} /></div>
+      <div className="snake-stage"><Snake length={s.length} /><Celebrate show={s.done} /></div>
+      <TurnProgress value={s.done ? 1 : s.length} label="الثعبان طوّل قد إيه" />
       <p className="board-hint">{s.done ? 'الثعبان طوّل!' : `مطّ أول صوت «${first}» زي الثعبان، وبعدين كمّل الكلمة`}</p>
       {s.done && <button className="btn btn-primary" onClick={next}>{turn + 1 >= TURNS ? 'خلصنا' : 'كلمة كمان'}</button>}
       <Dots n={TURNS} at={turn} />

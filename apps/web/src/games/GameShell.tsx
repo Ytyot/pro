@@ -1,17 +1,19 @@
-import { useCallback, useRef, useState, type ReactNode } from 'react';
+import { Fragment, useCallback, useMemo, useRef, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
 import { ChildScreen } from '../components/ChildScreen';
 import { HoldButton } from '../components/HoldButton';
 import { StickerReward } from '../components/StickerReward';
 import { useChild } from '../pages/ChildLayout';
+import { VoiceMeter } from './GameBits';
+import { combine, fromHold, fromRef, type LevelSource } from './input';
 import { useMicLevel } from './useMicLevel';
 
-export const HELD_LEVEL = 0.55;
+export { HELD_LEVEL } from './input';
 
 export function GameShell({ title, hint, render }: {
   title: string;
   hint: string;
-  render: (getLevel: () => number, finish: () => void) => ReactNode;
+  render: (getLevel: LevelSource, finish: () => void) => ReactNode;
 }) {
   const child = useChild();
   const nav = useNavigate();
@@ -19,13 +21,16 @@ export function GameShell({ title, hint, render }: {
   const held = useRef(false);
   const [started, setStarted] = useState(false);
   const [finished, setFinished] = useState(false);
-  const getLevel = useCallback(() => (held.current ? HELD_LEVEL : mic.level.current), [mic.level]);
-  const finish = useCallback(() => { mic.stop(); setFinished(true); }, [mic]);
+  const [round, setRound] = useState(0);
+  // Voice adapter + hold-button adapter. A future input (e.g. gestures) is one more source here.
+  const getLevel = useMemo(() => combine(fromRef(mic.level), fromHold(held)), [mic.level]);
+  const finish = useCallback(() => { mic.stop(); held.current = false; setFinished(true); }, [mic]);
+  const playAgain = async () => { await mic.start(); setRound((r) => r + 1); setFinished(false); };
 
   if (finished) {
     return (
       <ChildScreen title={title}>
-        <StickerReward childId={child.id} onDone={() => nav('..', { relative: 'path' })} />
+        <StickerReward childId={child.id} onDone={() => nav('..', { relative: 'path' })} onAgain={() => void playAgain()} />
       </ChildScreen>
     );
   }
@@ -43,7 +48,8 @@ export function GameShell({ title, hint, render }: {
   const fallback = mic.status === 'denied' || mic.status === 'unsupported';
   return (
     <ChildScreen title={title}>
-      {render(getLevel, finish)}
+      <VoiceMeter getLevel={getLevel} />
+      <Fragment key={round}>{render(getLevel, finish)}</Fragment>
       {fallback && (
         <div className="fallback">
           <p className="muted">المايك مش شغال. دوسوا مع بعض على الزرار وإنتوا بتتكلموا.</p>

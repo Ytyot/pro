@@ -4,11 +4,13 @@ import { Turtle } from '../art/Turtle';
 import { speech } from '../content';
 import { shuffle } from '../logic/leitner';
 import { turtleStep, VOICE_ON } from '../logic/motion';
+import { Celebrate, HearWord } from './GameBits';
+import type { LevelSource } from './input';
 import { useFrame } from './useFrame';
 
 const TURNS = 5;
 
-export function TurtleBoard({ getLevel, onFinish }: { getLevel: () => number; onFinish: () => void }) {
+export function TurtleBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFinish: () => void }) {
   const words = useMemo(() => shuffle(speech.words).slice(0, TURNS), []);
   const [turn, setTurn] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -29,12 +31,13 @@ export function TurtleBoard({ getLevel, onFinish }: { getLevel: () => number; on
 
   return (
     <div className="board">
-      <div className="word-card"><Art code={word.art} size={120} /><span>{word.text}</span></div>
+      <div className="word-card"><Art code={word.art} size={120} /><span>{word.text}</span><HearWord text={word.text} /></div>
       <div className="track" aria-hidden="true">
         <div className="track-goal"><Art code="1F96C" size={48} /></div>
         <div className="track-runner" style={{ insetInlineStart: `${progress * 72}%` }}>
           <Turtle size={110} walking={talking && !arrived} />
         </div>
+        <Celebrate show={arrived} />
       </div>
       <p className="board-hint">{arrived ? 'وصلت السلحفاة!' : 'قول الكلمة بنعومة ومطّها، والسلحفاة تمشي'}</p>
       {arrived && <button className="btn btn-primary" onClick={next}>{turn + 1 >= TURNS ? 'خلصنا' : 'الكلمة اللي بعدها'}</button>}
