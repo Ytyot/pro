@@ -36,8 +36,8 @@
   border: 2.5px solid var(--sky); background: radial-gradient(circle at 30% 30%, #fff 0 12%, transparent 13%), color-mix(in srgb, var(--card) 55%, transparent);
   animation: rise 3.2s var(--ease) forwards; cursor: pointer; touch-action: none;
 }
-.bubble.popped { animation: pop .25s ease-out forwards; }
-@keyframes pop { to { transform: scale(1.4); opacity: 0; } }
+.bubble.popped { animation: bubble-pop .25s ease-out forwards; }
+@keyframes bubble-pop { to { transform: scale(1.4); opacity: 0; } }
 @keyframes rise { to { transform: translateY(-400px); opacity: .2; } }
 
 .dots { display: flex; gap: 8px; justify-content: center; width: fit-content; margin: 14px auto 0; }
