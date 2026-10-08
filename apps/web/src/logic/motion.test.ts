@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { balloonStart, balloonStep, bubbleStep, rmsToLevel, snakeStart, snakeStep, turtleStep } from './motion';
+import {
+  balloonStart, balloonStep, bubbleStep, FISH_X, fishStart, fishStep, rmsToLevel, rocketStep, snakeStart, snakeStep, turtleStep,
+} from './motion';
 
 const run = <S>(s: S, step: (s: S, l: number, dt: number) => S, levels: number[], dt = 16) =>
   levels.reduce((acc, l) => step(acc, l, dt), s);
@@ -65,5 +67,46 @@ describe('bubbles', () => {
     for (let i = 0; i < 60; i++) { const r = bubbleStep(acc, 0.25, 16); acc = r.accMs; if (r.spawn) spawned++; }
     expect(spawned).toBeGreaterThanOrEqual(4);
     expect(bubbleStep(0, 0.05, 1000).spawn).toBe(false);
+  });
+});
+
+describe('rocket', () => {
+  it('climbs only while there is voice, and stops at the moon', () => {
+    expect(rocketStep(0.4, 0.1, 500)).toBe(0.4);
+    expect(rocketStep(0, 0.5, 500)).toBeCloseTo(0.1);
+    expect(rocketStep(0.99, 0.9, 1000)).toBe(1);
+  });
+  it('does not climb faster for louder voice', () => {
+    expect(rocketStep(0, 0.4, 100)).toBe(rocketStep(0, 1, 100));
+  });
+});
+
+describe('fish', () => {
+  it('rises with voice, drifts down when quiet, and stays inside the sea', () => {
+    const up = fishStep(fishStart, 0.5, 500);
+    expect(up.y).toBeGreaterThan(fishStart.y);
+    expect(fishStep(up, 0, 500).y).toBeLessThan(up.y);
+    expect(fishStep({ ...fishStart, y: 0.99 }, 0.9, 1000).y).toBe(1);
+    expect(fishStep({ ...fishStart, y: 0.01 }, 0, 1000).y).toBe(0);
+  });
+  it('does not swim faster for louder voice', () => {
+    expect(fishStep(fishStart, 0.4, 100).y).toBe(fishStep(fishStart, 1, 100).y);
+  });
+  it('spawns treasures over time', () => {
+    const s = run(fishStart, (st, l, dt) => fishStep(st, l, dt, () => 0.5), Array(40).fill(0));
+    expect(s.items.length).toBeGreaterThan(0);
+    expect(s.nextId).toBeGreaterThan(0);
+  });
+  it('collects a treasure it touches', () => {
+    const s = { ...fishStart, y: 0.5, spawnMs: 0, items: [{ id: 1, x: FISH_X, y: 0.5 }] };
+    const after = fishStep(s, 0, 16);
+    expect(after.caught).toBe(1);
+    expect(after.items).toHaveLength(0);
+  });
+  it('missed treasures float away without taking anything back', () => {
+    const s = { ...fishStart, y: 0, spawnMs: 0, caught: 3, items: [{ id: 1, x: -0.09, y: 0.9 }] };
+    const after = fishStep(s, 0, 50);
+    expect(after.caught).toBe(3);
+    expect(after.items).toHaveLength(0);
   });
 });

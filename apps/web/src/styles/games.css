@@ -1,6 +1,6 @@
 .game-intro { display: grid; gap: 16px; justify-items: center; text-align: center; padding-top: 24px; }
 .parent-note { font-family: var(--font-ui); font-size: .95rem; max-width: 32ch; }
-.board { display: grid; gap: 16px; justify-items: center; }
+.board { position: relative; display: grid; gap: 16px; justify-items: center; }
 .board-hint { font: 600 1.15rem/1.5 var(--font-kid); text-align: center; min-height: 3em; margin: 0; }
 .word-card {
   display: grid; justify-items: center; gap: 6px; padding: 16px 28px;
@@ -19,13 +19,13 @@
 .track-runner .turtle { transform: scaleX(-1); }
 .track-goal { position: absolute; inset-inline-end: 12px; bottom: 26px; }
 
-.balloon-stage { width: 180px; height: 300px; }
+.balloon-stage { position: relative; width: 180px; height: 300px; }
 .balloon-stage.fly { animation: fly-away 1.6s var(--ease) forwards; }
 .balloon.wobble { animation: wobble .3s ease-in-out 2; transform-origin: 50% 90%; }
 @keyframes wobble { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-7deg); } 75% { transform: rotate(7deg); } }
 @keyframes fly-away { to { transform: translateY(-40px) rotate(4deg); opacity: .85; } }
 
-.snake-stage { width: 100%; padding: 12px 0; }
+.snake-stage { position: relative; width: 100%; padding: 12px 0; }
 
 .bubble-stage {
   position: relative; width: 100%; height: 320px; overflow: hidden; border-radius: var(--radius-lg);
@@ -34,8 +34,10 @@
 .bubble {
   position: absolute; bottom: -60px; border-radius: 50%;
   border: 2.5px solid var(--sky); background: radial-gradient(circle at 30% 30%, #fff 0 12%, transparent 13%), color-mix(in srgb, var(--card) 55%, transparent);
-  animation: rise 3.2s var(--ease) forwards;
+  animation: rise 3.2s var(--ease) forwards; cursor: pointer; touch-action: none;
 }
+.bubble.popped { animation: bubble-pop .25s ease-out forwards; }
+@keyframes bubble-pop { to { transform: scale(1.4); opacity: 0; } }
 @keyframes rise { to { transform: translateY(-400px); opacity: .2; } }
 
 .dots { display: flex; gap: 8px; justify-content: center; width: fit-content; margin: 14px auto 0; }
@@ -50,3 +52,64 @@
   user-select: none; -webkit-user-select: none; touch-action: none; cursor: pointer;
 }
 .hold-btn.held { transform: translateY(4px); box-shadow: none; background: var(--sun); }
+
+.word-card .round-btn { margin-top: 4px; }
+
+.voice-meter {
+  display: flex; align-items: center; gap: 8px; width: fit-content; margin: 0 auto 10px; padding: 4px 14px;
+  font: 600 1rem var(--font-kid); color: var(--ink-2);
+  border: 2px solid var(--line); border-radius: 999px; transition: background-color .2s, border-color .2s;
+}
+.voice-meter img { opacity: .45; transition: opacity .2s; }
+.voice-meter.on { background: var(--sage-soft); border-color: var(--sage); color: var(--ink); }
+.voice-meter.on img { opacity: 1; }
+.voice-meter.idle { background: var(--sun-soft); border-color: var(--sun); color: var(--ink); animation: nudge 2.4s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: scale(1.04); } }
+
+.turn-progress {
+  width: min(320px, 100%); height: 14px; border-radius: 999px; overflow: hidden;
+  border: 2px solid var(--ink); background: var(--card);
+}
+.turn-progress span { display: block; height: 100%; background: var(--sun); transition: inline-size .15s linear; }
+
+.celebrate { position: absolute; inset: 0; pointer-events: none; }
+.celebrate span {
+  position: absolute; inset-block-start: 40%; inset-inline-start: calc(10% + var(--i) * 18%);
+  animation: sparkle 1.4s var(--ease) calc(var(--i) * .12s) both;
+}
+@keyframes sparkle { from { transform: translateY(20px) scale(.4); opacity: 0; } 50% { opacity: 1; } to { transform: translateY(-60px) scale(1); opacity: 0; } }
+
+.rocket-stage {
+  position: relative; width: 100%; height: 340px; overflow: hidden; border-radius: var(--radius-lg);
+  background: linear-gradient(to top, var(--sky-soft), color-mix(in srgb, var(--sky) 35%, var(--card)));
+  border: 2.5px solid var(--ink);
+}
+.rocket-moon { position: absolute; inset-block-start: 10px; left: 50%; translate: -50% 0; }
+.rocket { position: absolute; left: 50%; translate: -50% 0; transition: inset-block-end .1s linear; }
+.rocket img { rotate: -45deg; }
+.rocket.flying img { animation: rumble .3s ease-in-out infinite; }
+@keyframes rumble { 50% { transform: translateY(2px); } }
+.rocket-star { position: absolute; opacity: .35; transition: opacity .4s, scale .4s; }
+.rocket-star.lit { opacity: 1; scale: 1.2; }
+.rocket-star:not(.lit) img, .sky-star:not(.lit) img { filter: grayscale(.7); }
+
+.star-sky {
+  position: relative; width: 100%; height: 300px; overflow: hidden; border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--sky) 45%, #1d2a44); border: 2.5px solid var(--ink);
+}
+.star-sky svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.star-sky polyline { fill: none; stroke: #FFE9A8; stroke-width: 2.5px; stroke-dasharray: 6 5; vector-effect: non-scaling-stroke; }
+.sky-star { position: absolute; translate: -50% 0; transition: opacity .2s, scale .2s; }
+[dir="rtl"] .sky-star { translate: 50% 0; }
+.sky-star.lit img { animation: twinkle 2.4s ease-in-out infinite; }
+@keyframes twinkle { 50% { transform: scale(1.08); } }
+
+.fish-sea {
+  position: relative; width: 100%; height: 320px; overflow: hidden; border-radius: var(--radius-lg);
+  background: linear-gradient(to top, color-mix(in srgb, var(--sky) 40%, var(--card)), var(--sky-soft));
+  border: 2.5px solid var(--ink);
+}
+.fish, .fish-item { position: absolute; translate: 50% 50%; }
+.fish { transition: inset-block-end .1s linear; }
+.progress-text { margin: -8px 0 0; font: 700 1rem var(--font-kid); color: var(--ink-2); text-align: center; }
+.dots + .progress-text { margin-top: 6px; }

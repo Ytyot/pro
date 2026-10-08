@@ -14,7 +14,7 @@ const json = (f) => JSON.parse(readFileSync(resolve(root, 'content', f), 'utf8')
 // Keep in sync with UI_ART in src/content/index.ts
 const codes = new Set(['1F522', '1F537', '1F3A8', '1F524', '1F308', '2795', '1F422', '1F388', '1F40D', '1FAE7',
   '1F3B5', '1F4DA', '1F4FA', '1F3A4', '1F4C8', '2699', '1F4D8', '1F31F', '1F96C', '1F4AC', '1F442', '1F9E9', '270F',
-  '1F34E', '2B50', '1F41F', '1F33B', '1F986']);
+  '1F34E', '2B50', '1F41F', '1F33B', '1F986', '1F680', '1F319', '1F41A']);
 const add = (x) => x && codes.add(x);
 json('letters-ar.json').forEach((x) => add(x.art));
 json('letters-en.json').forEach((x) => add(x.art));

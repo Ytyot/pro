@@ -34,7 +34,7 @@ for (const scheme of ['light', 'dark'] as const) {
     await page.getByRole('radio', { name: '٢' }).click({ timeout: 10_000 });
     await visit(`${base}/progress`, '08-progress');
     await visit(`${base}/voice`, '09-voice-menu');
-    for (const [game, n] of [['turtle', 10], ['balloon', 12], ['snake', 14], ['bubbles', 16]] as const) {
+    for (const [game, n] of [['turtle', 10], ['balloon', 12], ['snake', 14], ['bubbles', 16], ['rocket', 31], ['star', 33], ['fish', 35]] as const) {
       await visit(`${base}/voice/${game}`, `${n}-${game}-intro`);
       await page.getByRole('button', { name: 'يلا نبدأ' }).click();
       await shoot(`${n + 1}-${game}-play`);
@@ -44,7 +44,11 @@ for (const scheme of ['light', 'dark'] as const) {
     await visit(`${base}/learn/ar-letters/match`, '22-match');
     await visit(`${base}/learn/numbers/count`, '23-count');
     await visit(`${base}/learn/ar-letters/trace`, '24-trace');
-    await visit(`${base}/stories/nest`, '25-story');
+    await visit(`${base}/stories`, '25-stories');
+    await visit(`${base}/stories/little-bird`, '25-story');
+    for (let k = 0; k < 5; k++) await page.getByRole('button', { name: 'وبعدين؟' }).click();
+    await page.getByRole('button', { name: 'خلصنا' }).click();
+    await shoot('25-story-end');
     await visit(`${base}/stickers`, '26-stickers');
     await visit(`${base}/library`, '27-library');
     await visit(`${base}/settings`, '28-settings');
