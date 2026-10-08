@@ -3,19 +3,21 @@ import { Art } from '../art/Art';
 import { speech } from '../content';
 import { shuffle } from '../logic/leitner';
 import { snakeStart, snakeStep } from '../logic/motion';
-import { Celebrate, HearWord } from './GameBits';
-import type { LevelSource } from './input';
+import { Celebrate, HearWord, TurnProgress } from './GameBits';
+import type { BoardProps } from './input';
 import { useFrame } from './useFrame';
 
 /** Star positions in the sky (x%, y% from the top), joined in this order once lit. */
-const SPOTS = [[14, 70], [32, 38], [50, 66], [66, 28], [84, 58], [50, 12]] as const;
+const SPOTS = [[14, 70], [32, 38], [50, 66], [66, 28], [84, 58], [50, 12], [24, 14], [80, 84]] as const;
+const STARS = 6;
 
-export function StarBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFinish: () => void }) {
-  const words = useMemo(() => shuffle(speech.words).slice(0, SPOTS.length), []);
+export function StarBoard({ getLevel, onFinish, level = 0 }: BoardProps) {
+  const spots = SPOTS.slice(0, Math.min(SPOTS.length, STARS + level));
+  const words = useMemo(() => shuffle(speech.words).slice(0, spots.length), [spots.length]);
   const [lit, setLit] = useState(0);
   // One star = one word: the same "voice, then a short pause" rule as the snake.
   const [s, setS] = useState(snakeStart);
-  const done = lit >= SPOTS.length;
+  const done = lit >= spots.length;
 
   useFrame((dt) => setS((prev) => snakeStep(prev, getLevel(), dt)), !done && !s.done);
 
@@ -26,7 +28,7 @@ export function StarBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFin
   }, [s.done]);
 
   const word = words[lit];
-  const line = SPOTS.slice(0, lit).map(([x, y]) => `${x},${y}`).join(' ');
+  const line = spots.slice(0, lit).map(([x, y]) => `${x},${y}`).join(' ');
 
   return (
     <div className="board">
@@ -35,7 +37,7 @@ export function StarBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFin
       )}
       <div className="star-sky" aria-hidden="true">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none"><polyline points={line} /></svg>
-        {SPOTS.map(([x, y], i) => {
+        {spots.map(([x, y], i) => {
           const glow = i < lit ? 1 : i === lit ? (s.done ? 1 : s.length) : 0;
           return (
             <span key={i} className={`sky-star${i < lit ? ' lit' : ''}${i === lit ? ' now' : ''}`}
@@ -48,7 +50,7 @@ export function StarBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFin
       </div>
       <p className="board-hint">{done ? 'السما كلها نوّرت!' : 'قول الكلمة بصوت ناعم وطويل، والنجمة تنوّر'}</p>
       {done && <button className="btn btn-primary" onClick={onFinish}>خلصنا</button>}
-      <p className="muted star-count" aria-label={`${lit} من ${SPOTS.length}`}>{lit} / {SPOTS.length}</p>
+      <TurnProgress value={lit / spots.length} label="النجوم اللي نوّرت" text={`${lit} من ${spots.length} نجوم`} />
     </div>
   );
 }

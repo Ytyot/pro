@@ -8,6 +8,9 @@ export type LevelSource = () => number;
 /** Level reported while the hold button is pressed: above VOICE_ON, below the balloon's hard-start level. */
 export const HELD_LEVEL = 0.55;
 
+/** Props every game board receives. `level` is 0 the first time and grows on "play again" (more turns, never harder speech). */
+export interface BoardProps { getLevel: LevelSource; onFinish: () => void; level?: number }
+
 export const fromRef = (ref: { readonly current: number }): LevelSource => () => ref.current;
 
 export const fromHold = (held: { readonly current: boolean }): LevelSource => () => (held.current ? HELD_LEVEL : 0);

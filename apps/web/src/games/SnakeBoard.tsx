@@ -6,22 +6,23 @@ import { shuffle } from '../logic/leitner';
 import { snakeStart, snakeStep } from '../logic/motion';
 import { Dots } from './TurtleBoard';
 import { Celebrate, HearWord, TurnProgress } from './GameBits';
-import type { LevelSource } from './input';
+import type { BoardProps } from './input';
 import { useFrame } from './useFrame';
 
 const TURNS = 5;
 const STRETCHY = ['س', 'ش', 'ف', 'م', 'ن', 'ل', 'و', 'ع'];
 
-export function SnakeBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFinish: () => void }) {
+export function SnakeBoard({ getLevel, onFinish, level = 0 }: BoardProps) {
   const words = useMemo(
-    () => shuffle(speech.words.filter((w) => STRETCHY.includes(w.text[0]!))).slice(0, TURNS), []);
+    () => shuffle(speech.words.filter((w) => STRETCHY.includes(w.text[0]!))).slice(0, TURNS + level), [level]);
+  const turns = words.length;
   const [turn, setTurn] = useState(0);
   const [s, setS] = useState(snakeStart);
 
   useFrame((dt) => setS((prev) => snakeStep(prev, getLevel(), dt)), !s.done);
 
   const next = () => {
-    if (turn + 1 >= TURNS) onFinish();
+    if (turn + 1 >= turns) onFinish();
     else { setTurn(turn + 1); setS(snakeStart); }
   };
   const word = words[turn]!;
@@ -37,8 +38,8 @@ export function SnakeBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFi
       <div className="snake-stage"><Snake length={s.length} /><Celebrate show={s.done} /></div>
       <TurnProgress value={s.done ? 1 : s.length} label="الثعبان طوّل قد إيه" />
       <p className="board-hint">{s.done ? 'الثعبان طوّل!' : `مطّ أول صوت «${first}» زي الثعبان، وبعدين كمّل الكلمة`}</p>
-      {s.done && <button className="btn btn-primary" onClick={next}>{turn + 1 >= TURNS ? 'خلصنا' : 'كلمة كمان'}</button>}
-      <Dots n={TURNS} at={turn} />
+      {s.done && <button className="btn btn-primary" onClick={next}>{turn + 1 >= turns ? 'خلصنا' : 'كلمة كمان'}</button>}
+      <Dots n={turns} at={turn} showCount />
     </div>
   );
 }

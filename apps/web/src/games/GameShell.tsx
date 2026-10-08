@@ -10,10 +10,13 @@ import { useMicLevel } from './useMicLevel';
 
 export { HELD_LEVEL } from './input';
 
+/** Each "play again" adds a little more to do (more turns), up to this many steps. */
+const MAX_LEVEL = 2;
+
 export function GameShell({ title, hint, render }: {
   title: string;
   hint: string;
-  render: (getLevel: LevelSource, finish: () => void) => ReactNode;
+  render: (getLevel: LevelSource, finish: () => void, level: number) => ReactNode;
 }) {
   const child = useChild();
   const nav = useNavigate();
@@ -49,7 +52,7 @@ export function GameShell({ title, hint, render }: {
   return (
     <ChildScreen title={title}>
       <VoiceMeter getLevel={getLevel} />
-      <Fragment key={round}>{render(getLevel, finish)}</Fragment>
+      <Fragment key={round}>{render(getLevel, finish, Math.min(round, MAX_LEVEL))}</Fragment>
       {fallback && (
         <div className="fallback">
           <p className="muted">المايك مش شغال. دوسوا مع بعض على الزرار وإنتوا بتتكلموا.</p>

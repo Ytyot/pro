@@ -12,13 +12,13 @@ beforeEach(async () => {
   vi.stubGlobal('fetch', vi.fn(async () => { throw new TypeError('offline'); }));
 });
 
-function renderShell(board = (getLevel: () => number) => <p>level:{getLevel()}</p>) {
+function renderShell(board = (getLevel: () => number, _level: number) => <p>level:{getLevel()}</p>) {
   render(
     <MemoryRouter initialEntries={['/child/c1/voice/x']}>
       <Routes>
         <Route path="/child/:childId" element={<ChildLayout />}>
           <Route path="voice/x" element={
-            <GameShell title="لعبة" hint="جرّب" render={(getLevel, finish) => <>{board(getLevel)}<button onClick={finish}>end</button></>} />} />
+            <GameShell title="لعبة" hint="جرّب" render={(getLevel, finish, level) => <>{board(getLevel, level)}<button onClick={finish}>end</button></>} />} />
         </Route>
       </Routes>
     </MemoryRouter>,
@@ -44,15 +44,16 @@ describe('GameShell', () => {
     expect(await screen.findByRole('button', { name: 'دوس وإنت بتتكلم' })).toBeTruthy();
   });
 
-  it('play again restarts the game after the sticker', async () => {
+  it('play again restarts the game after the sticker, one step longer', async () => {
     vi.stubGlobal('navigator', { ...navigator, mediaDevices: undefined });
-    renderShell(() => <p>board</p>);
+    renderShell((_g, level) => <p>board:{level}</p>);
     fireEvent.click(await screen.findByRole('button', { name: 'يلا نبدأ' }));
+    expect(await screen.findByText('board:0')).toBeTruthy();
     fireEvent.click(await screen.findByRole('button', { name: 'end' }));
     const choices = await screen.findAllByRole('button', { name: /ملصق/ });
     fireEvent.click(choices[0]!);
     fireEvent.click(await screen.findByRole('button', { name: 'نلعب تاني' }));
-    expect(await screen.findByText('board')).toBeTruthy();
+    expect(await screen.findByText('board:1')).toBeTruthy();
     expect(screen.getByRole('button', { name: 'end' })).toBeTruthy();
   });
 });

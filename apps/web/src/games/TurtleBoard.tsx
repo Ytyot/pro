@@ -5,13 +5,14 @@ import { speech } from '../content';
 import { shuffle } from '../logic/leitner';
 import { turtleStep, VOICE_ON } from '../logic/motion';
 import { Celebrate, HearWord } from './GameBits';
-import type { LevelSource } from './input';
+import type { BoardProps } from './input';
 import { useFrame } from './useFrame';
 
 const TURNS = 5;
 
-export function TurtleBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFinish: () => void }) {
-  const words = useMemo(() => shuffle(speech.words).slice(0, TURNS), []);
+export function TurtleBoard({ getLevel, onFinish, level = 0 }: BoardProps) {
+  const turns = TURNS + level;
+  const words = useMemo(() => shuffle(speech.words).slice(0, turns), [turns]);
   const [turn, setTurn] = useState(0);
   const [progress, setProgress] = useState(0);
   const [talking, setTalking] = useState(false);
@@ -24,7 +25,7 @@ export function TurtleBoard({ getLevel, onFinish }: { getLevel: LevelSource; onF
   }, !arrived);
 
   const next = () => {
-    if (turn + 1 >= TURNS) onFinish();
+    if (turn + 1 >= turns) onFinish();
     else { setTurn(turn + 1); setProgress(0); }
   };
   const word = words[turn]!;
@@ -40,16 +41,19 @@ export function TurtleBoard({ getLevel, onFinish }: { getLevel: LevelSource; onF
         <Celebrate show={arrived} />
       </div>
       <p className="board-hint">{arrived ? 'وصلت السلحفاة!' : 'قول الكلمة بنعومة ومطّها، والسلحفاة تمشي'}</p>
-      {arrived && <button className="btn btn-primary" onClick={next}>{turn + 1 >= TURNS ? 'خلصنا' : 'الكلمة اللي بعدها'}</button>}
-      <Dots n={TURNS} at={turn} />
+      {arrived && <button className="btn btn-primary" onClick={next}>{turn + 1 >= turns ? 'خلصنا' : 'الكلمة اللي بعدها'}</button>}
+      <Dots n={turns} at={turn} showCount />
     </div>
   );
 }
 
-export function Dots({ n, at }: { n: number; at: number }) {
+export function Dots({ n, at, showCount = false }: { n: number; at: number; showCount?: boolean }) {
   return (
-    <div className="dots" aria-label={`${at + 1} من ${n}`}>
-      {Array.from({ length: n }, (_, i) => <span key={i} className={i < at ? 'done' : i === at ? 'now' : ''} />)}
-    </div>
+    <>
+      <div className="dots" aria-label={`${at + 1} من ${n}`}>
+        {Array.from({ length: n }, (_, i) => <span key={i} className={i < at ? 'done' : i === at ? 'now' : ''} />)}
+      </div>
+      {showCount && <p className="progress-text" aria-hidden="true">دور {at + 1} من {n}</p>}
+    </>
   );
 }

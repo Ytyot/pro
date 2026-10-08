@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react';
 import { bubbleStep } from '../logic/motion';
 import { Celebrate, TurnProgress } from './GameBits';
-import type { LevelSource } from './input';
+import type { BoardProps } from './input';
 import { useFrame } from './useFrame';
 
 interface Bubble { id: number; x: number; r: number; popped?: boolean }
 
-export function BubblesBoard({ getLevel, onFinish, goal = 25 }: { getLevel: LevelSource; onFinish: () => void; goal?: number }) {
+export function BubblesBoard({ getLevel, onFinish, goal: baseGoal = 25, level = 0 }: BoardProps & { goal?: number }) {
+  const goal = baseGoal + level * 5;
   const [bubbles, setBubbles] = useState<Bubble[]>([]);
   const [count, setCount] = useState(0);
   const acc = useRef(0);
@@ -35,7 +36,7 @@ export function BubblesBoard({ getLevel, onFinish, goal = 25 }: { getLevel: Leve
         ))}
         <Celebrate show={done} />
       </div>
-      <TurnProgress value={count / goal} label={`${Math.min(count, goal)} فقاعة من ${goal}`} />
+      <TurnProgress value={count / goal} label="الفقاعات" text={`${Math.min(count, goal)} فقاعة من ${goal}`} />
       <p className="board-hint">{done ? 'فقاعات كتير حلوة!' : 'انفخ نفخة طويلة ناعمة، زي ما بتطفي شمعة من بعيد. ودوس على الفقاعة تفرقعها!'}</p>
       {done && <button className="btn btn-primary" onClick={onFinish}>خلصنا</button>}
     </div>

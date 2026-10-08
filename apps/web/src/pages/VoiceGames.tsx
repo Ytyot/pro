@@ -5,7 +5,7 @@ import { Balloon } from '../art/Balloon';
 import { Turtle } from '../art/Turtle';
 import { ChildScreen } from '../components/ChildScreen';
 import { GameShell } from '../games/GameShell';
-import type { LevelSource } from '../games/input';
+import type { BoardProps } from '../games/input';
 import { TurtleBoard } from '../games/TurtleBoard';
 import { BalloonBoard } from '../games/BalloonBoard';
 import { SnakeBoard } from '../games/SnakeBoard';
@@ -19,7 +19,7 @@ interface GameDef {
   hint: string;
   color: 'sage' | 'clay' | 'sun' | 'sky';
   icon: ReactNode;
-  Board: (props: { getLevel: LevelSource; onFinish: () => void }) => ReactNode;
+  Board: (props: BoardProps) => ReactNode;
 }
 
 export const GAMES = {
@@ -56,5 +56,5 @@ export function VoiceGame() {
   const g: GameDef | undefined = GAMES[game as keyof typeof GAMES];
   if (!g) return <VoiceGames />;
   const { Board } = g;
-  return <GameShell key={game} title={g.title} hint={g.hint} render={(getLevel, finish) => <Board getLevel={getLevel} onFinish={finish} />} />;
+  return <GameShell key={game} title={g.title} hint={g.hint} render={(getLevel, finish, level) => <Board getLevel={getLevel} onFinish={finish} level={level} />} />;
 }

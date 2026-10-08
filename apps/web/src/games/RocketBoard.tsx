@@ -2,14 +2,15 @@ import { useState } from 'react';
 import { Art } from '../art/Art';
 import { rocketStep, VOICE_ON } from '../logic/motion';
 import { Celebrate } from './GameBits';
-import type { LevelSource } from './input';
+import type { BoardProps } from './input';
 import { Dots } from './TurtleBoard';
 import { useFrame } from './useFrame';
 
 const TURNS = 4;
 const STARS = [0.3, 0.6];
 
-export function RocketBoard({ getLevel, onFinish }: { getLevel: LevelSource; onFinish: () => void }) {
+export function RocketBoard({ getLevel, onFinish, level = 0 }: BoardProps) {
+  const turns = TURNS + level;
   const [turn, setTurn] = useState(0);
   const [height, setHeight] = useState(0);
   const [flying, setFlying] = useState(false);
@@ -22,7 +23,7 @@ export function RocketBoard({ getLevel, onFinish }: { getLevel: LevelSource; onF
   }, !arrived);
 
   const next = () => {
-    if (turn + 1 >= TURNS) onFinish();
+    if (turn + 1 >= turns) onFinish();
     else { setTurn(turn + 1); setHeight(0); }
   };
 
@@ -42,8 +43,8 @@ export function RocketBoard({ getLevel, onFinish }: { getLevel: LevelSource; onF
         <Celebrate show={arrived} />
       </div>
       <p className="board-hint">{arrived ? 'الصاروخ وصل للقمر!' : 'قول «آآآ» طويلة وناعمة، والصاروخ يطلع لفوق'}</p>
-      {arrived && <button className="btn btn-primary" onClick={next}>{turn + 1 >= TURNS ? 'خلصنا' : 'صاروخ كمان'}</button>}
-      <Dots n={TURNS} at={turn} />
+      {arrived && <button className="btn btn-primary" onClick={next}>{turn + 1 >= turns ? 'خلصنا' : 'صاروخ كمان'}</button>}
+      <Dots n={turns} at={turn} showCount />
     </div>
   );
 }
